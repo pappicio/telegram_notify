@@ -19,7 +19,7 @@ from logging.handlers import RotatingFileHandler
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
-LOGS = os.path.join(ROOT, "logs")
+LOG_FILE = "/tmp/telegram-notify.log"
 CONFIG_FILE = os.path.join(DATA, "config.json")
 MONITOR_STATE_FILE = os.path.join(DATA, "monitor-state.json")
 MODE_MARKER = "/usr/data/opencreator/tunneled/tunneled.sh"
@@ -122,12 +122,11 @@ def get_session(cookie_header):
         return session["username"]
 
 os.makedirs(DATA, exist_ok=True)
-os.makedirs(LOGS, exist_ok=True)
 
 logger = logging.getLogger("telegram_notify")
 logger.setLevel(logging.INFO)
 handler = RotatingFileHandler(
-    os.path.join(LOGS, "telegram-notify.log"),
+    LOG_FILE,
     maxBytes=1024 * 1024,
     backupCount=3
 )
@@ -525,8 +524,9 @@ def monitor():
 
                 current = str(stats.get("state", "unknown")).lower()
                 filename = stats.get("filename") or ""
-                progress = int(float(
-                    display.get("progress") or sdcard.get("progress") or 0
+                progress = int(max(
+                    float(display.get("progress") or 0),
+                    float(sdcard.get("progress") or 0)
                 ) * 100)
                 message = stats.get("message") or ""
 
