@@ -562,7 +562,8 @@ def monitor():
 
                 elif current == "paused" and previous_state != "paused":
                     send_notification(
-                        notification_text("print_paused", filename=filename)
+                        notification_text("print_paused", filename=filename),
+                        True
                     )
                     set_status(last_event="Paused")
 
@@ -603,7 +604,8 @@ def monitor():
                             "print_progress",
                             progress=progress,
                             filename=filename
-                        )
+                        ),
+                        True
                     )
                     last_progress = (progress // threshold) * threshold
 
