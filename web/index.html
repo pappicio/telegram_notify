@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telegram Notify</title>
+<style>
+:root{color-scheme:dark;font-family:Arial,sans-serif;background:#15191f;color:#e8edf2}
+body{margin:0;padding:24px;max-width:900px;margin:auto}
+h1{font-size:27px;margin-bottom:6px}
+.sub{color:#9ba8b5;margin-bottom:24px}
+.card{background:#202731;border:1px solid #35404d;border-radius:10px;padding:20px;margin:16px 0}
+h2{font-size:18px;margin:0 0 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-size:14px;color:#b9c5d0;margin-bottom:7px}
+input,textarea,select{box-sizing:border-box;width:100%;padding:11px;background:#151b22;border:1px solid #465363;border-radius:6px;color:#fff;font-size:15px}
+textarea{min-height:75px;resize:vertical}
+.field{margin-bottom:14px}
+.token-control{display:flex;gap:8px;align-items:center}
+.token-control input{flex:1;min-width:0}
+.token-toggle{margin:0;min-width:46px;padding:9px}
+.check{display:flex;align-items:center;gap:10px;margin:12px 0}
+.check input{width:auto}
+button{border:0;border-radius:6px;padding:11px 17px;font-size:14px;font-weight:bold;cursor:pointer;background:#2785d7;color:white;margin:5px 7px 5px 0}
+button.secondary{background:#465363}
+.status{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:#151b22;border-radius:7px;padding:13px}
+.stat small{display:block;color:#9ba8b5;margin-bottom:6px}
+.stat strong{overflow-wrap:anywhere}
+#notice{margin:12px 0;color:#83d69a;min-height:20px}
+.language-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.language-actions button{margin-left:0}
+#languageFile{display:none}
+#login{max-width:420px;margin:9vh auto}
+#loginError{color:#ff8585;min-height:22px;margin-top:10px}
+#app[hidden],#login[hidden]{display:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media(max-width:600px){.grid,.status{grid-template-columns:1fr}body{padding:14px}}
+</style>
+</head>
+<body>
+<section id="login" class="card" hidden>
+<h1>Telegram Notify</h1>
+<div class="sub">OpenCreator · Creator 5</div>
+<h2 data-i18n="ssh_login">SSH Login</h2>
+<form id="loginForm">
+<div class="field">
+<label for="loginUsername" data-i18n="username">Username</label>
+<input id="loginUsername" name="username" autocomplete="username" required>
+</div>
+<div class="field">
+<label for="loginPassword" data-i18n="password">Password</label>
+<input id="loginPassword" name="password" type="password"
+       autocomplete="current-password" required>
+</div>
+<button type="submit" data-i18n="login">Login</button>
+<div id="loginError" role="alert"></div>
+</form>
+</section>
+
+<main id="app" hidden>
+<div class="topbar">
+<div>
+<h1 data-i18n="title">Telegram Notify</h1>
+<div class="sub" data-i18n="subtitle">OpenCreator · Creator 5</div>
+</div>
+<button type="button" class="secondary" onclick="logout()" data-i18n="logout">Logout</button>
+</div>
+
+<section class="card">
+<h2 data-i18n="language_settings">Language Settings</h2>
+<div class="grid">
+<div class="field">
+<label for="language" data-i18n="language">Interface language</label>
+<select id="language"></select>
+</div>
+<div class="field">
+<label data-i18n="language_settings">Language Settings</label>
+<div class="language-actions">
+<button type="button" class="secondary" onclick="downloadLanguage()" data-i18n="download">Download language</button>
+<button type="button" class="secondary" onclick="document.getElementById('languageFile').click()" data-i18n="upload">Upload language</button>
+<input id="languageFile" type="file" accept=".json,application/json">
+</div>
+</div>
+</div>
+</section>
+
+<section class="card">
+<h2 data-i18n="printer_status">Printer Status</h2>
+<div class="status">
+<div class="stat"><small data-i18n="moonraker">Moonraker</small><strong id="connection">Loading...</strong></div>
+<div class="stat"><small data-i18n="print_state">Print State</small><strong id="state">-</strong></div>
+<div class="stat"><small data-i18n="file">File</small><strong id="filename">-</strong></div>
+<div class="stat"><small data-i18n="progress">Progress</small><strong id="progress">0%</strong></div>
+<div class="stat"><small data-i18n="last_event">Last Event</small><strong id="last_event">-</strong></div>
+</div>
+</section>
+
+<section class="card">
+<h2 data-i18n="telegram_configuration">Telegram Configuration</h2>
+<div class="field">
+<label for="token" data-i18n="bot_token">Bot Token</label>
+<div class="token-control">
+<input id="token" type="password" autocomplete="new-password" data-i18n-placeholder="token_placeholder" placeholder="Leave empty to keep the current token">
+<button id="tokenToggle" class="secondary token-toggle" type="button"
+        onclick="toggleTokenVisibility()" title="Show token"
+        aria-label="Show token">👁</button>
+</div>
+<small id="token_state"></small>
+</div>
+<div class="field">
+<label for="chat_ids" data-i18n="chat_ids">Chat IDs</label>
+<textarea id="chat_ids" data-i18n-placeholder="chat_placeholder" placeholder="-1001234567890"></textarea>
+</div>
+<div class="grid">
+<div class="field">
+<label for="name" data-i18n="printer_name">Printer Name</label>
+<input id="name" value="Creator 5">
+</div>
+<div class="field">
+<label for="progress_percent"><span data-i18n="progress_interval">Progress Notification Interval (%)</span> · <span data-i18n="progress_disabled">0 disables notifications</span></label>
+<input id="progress_percent" type="number" min="0" max="100" value="0">
+</div>
+<div class="field">
+<label for="poll_interval" data-i18n="poll_interval">Moonraker Poll Interval (seconds)</label>
+<input id="poll_interval" type="number" min="2" max="30" value="3">
+</div>
+<div class="field">
+<label for="snapshot_url" data-i18n="webcam_url">Webcam Snapshot URL</label>
+<input id="snapshot_url" value="http://127.0.0.1:8080/?action=snapshot">
+</div>
+</div>
+<label class="check"><input id="silent" type="checkbox"> <span data-i18n="silent">Send messages silently</span></label>
+<label class="check"><input id="send_photos" type="checkbox" checked> <span data-i18n="snapshots">Attach webcam snapshots to print events</span></label>
+<label class="check"><input id="enable_service" type="checkbox" checked> <span data-i18n="enable_service">Enable service</span></label>
+<div>
+<button onclick="saveConfig()" data-i18n="save">Save Configuration</button>
+<button class="secondary" onclick="testTelegram()" data-i18n="test">Send Test Message</button>
+</div>
+<div id="notice"></div>
+</section>
+</main>
+
+<script>
+let currentPack = null;
+let currentLanguage = 'en';
+let languagePacks = [];
+let savedTokenConfigured = false;
+let tokenVisible = false;
+
+async function api(url, options={}) {
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (!response.ok || data.ok === false) throw new Error(data.error || response.statusText);
+  return data;
+}
+function applyLanguage(pack) {
+  currentPack = pack;
+  currentLanguage = pack.code;
+  document.documentElement.lang = pack.code;
+  document.title = pack.interface.title || 'Telegram Notify';
+  const tokenToggle = document.getElementById('tokenToggle');
+  if (tokenToggle && !tokenVisible) {
+    tokenToggle.title = pack.interface.show_token;
+    tokenToggle.setAttribute('aria-label', pack.interface.show_token);
+  }
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const value = pack.interface[el.dataset.i18n];
+    if (typeof value === 'string') el.textContent = value;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const value = pack.interface[el.dataset.i18nPlaceholder];
+    if (typeof value === 'string') el.placeholder = value;
+  });
+}
+async function loadLanguage(code) {
+  let pack;
+  try {
+    pack = await api('/api/languages/' + encodeURIComponent(code) + '.json');
+  } catch(e) {
+    if (code === 'en') throw e;
+    pack = await api('/api/languages/en.json');
+    code = 'en';
+  }
+  if (!pack || pack.version !== 2 || !pack.interface || !pack.notifications) throw new Error('Invalid language pack');
+  applyLanguage(pack);
+  document.getElementById('language').value = code;
+}
+async function refreshLanguages(selected) {
+  const data = await api('/api/languages');
+  languagePacks = data.languages || [];
+  const select = document.getElementById('language');
+  select.innerHTML = '';
+  languagePacks.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item.code;
+    option.textContent = item.native_name + ' (' + item.code + ')';
+    select.appendChild(option);
+  });
+  if (!languagePacks.some(item => item.code === selected)) selected = 'en';
+  await loadLanguage(selected);
+}
+async function downloadLanguage() {
+  const response = await fetch('/api/languages/' + encodeURIComponent(currentLanguage) + '.json');
+  if (!response.ok) {
+    document.getElementById('notice').textContent = currentPack.interface.download_failed;
+    return;
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = currentLanguage + '.json';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+async function uploadLanguage(file) {
+  try {
+    if (!file || file.size > 16384) throw new Error(currentPack.interface.invalid_file_size);
+    const pack = JSON.parse(await file.text());
+    await api('/api/languages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(pack)
+    });
+    await refreshLanguages(pack.code);
+    await api('/api/config', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({language:pack.code})
+    });
+    document.getElementById('notice').textContent =
+      currentPack.interface.upload_success || currentPack.interface.upload_success;
+  } catch(e) {
+    document.getElementById('notice').textContent = currentPack.interface.error_prefix + e.message;
+  }
+}
+async function refreshStatus() {
+  try {
+    const s = await api('/api/status');
+    const t = currentPack.interface;
+
+    const connectionMap = {
+      Connected: t.connection_connected,
+      Disconnected: t.connection_disconnected,
+      Starting: t.connection_starting,
+      Dormant: t.connection_dormant,
+      Disabled: t.connection_disabled
+    };
+
+    const stateMap = {
+      printing: t.state_printing,
+      paused: t.state_paused,
+      complete: t.state_complete,
+      error: t.state_error,
+      cancelled: t.state_cancelled,
+      standby: t.state_standby
+    };
+
+    const eventMap = {
+      Resumed: t.event_resumed,
+      'Print started': t.event_print_started,
+      Paused: t.event_paused,
+      Completed: t.event_completed,
+      Error: t.event_error,
+      Cancelled: t.event_cancelled
+    };
+
+    document.getElementById('connection').textContent =
+      connectionMap[s.connection] || s.connection || '-';
+
+    document.getElementById('state').textContent =
+      stateMap[String(s.state || '').toLowerCase()] || t.state_unknown;
+
+    document.getElementById('filename').textContent = s.filename || '-';
+
+    document.getElementById('last_event').textContent =
+      eventMap[s.last_event] || s.last_event || '-';
+    document.getElementById('progress').textContent = (s.progress || 0) + '%';
+  } catch(e) {}
+}
+async function loadConfig() {
+  const c = await api('/api/config');
+  await refreshLanguages(c.language || 'en');
+  savedTokenConfigured = !!c.token_configured;
+  document.getElementById('token_state').textContent =
+    savedTokenConfigured ? currentPack.interface.token_saved : currentPack.interface.token_missing;
+  document.getElementById('token').placeholder = savedTokenConfigured
+    ? '••••••••••••'
+    : (currentPack.interface.token_placeholder || currentPack.interface.enter_bot_token);
+  for (const key of ['chat_ids','name','snapshot_url','progress_percent','poll_interval'])
+    document.getElementById(key).value = c[key];
+  for (const key of ['silent','send_photos','enable_service'])
+    document.getElementById(key).checked = c[key];
+}
+async function toggleTokenVisibility() {
+  const field = document.getElementById('token');
+  const button = document.getElementById('tokenToggle');
+
+  if (tokenVisible) {
+    field.type = 'password';
+    button.textContent = '👁';
+    button.title = currentPack.interface.show_token;
+    button.setAttribute('aria-label', currentPack.interface.show_token);
+    tokenVisible = false;
+    return;
+  }
+
+  try {
+    if (!field.value && savedTokenConfigured) {
+      const result = await api('/api/token');
+      field.value = result.token || '';
+    }
+
+    field.type = 'text';
+    button.textContent = '🙈';
+    button.title = currentPack.interface.hide_token;
+    button.setAttribute('aria-label', currentPack.interface.hide_token);
+    tokenVisible = true;
+    field.focus();
+  } catch (e) {
+    document.getElementById('notice').textContent = currentPack.interface.error_prefix + e.message;
+  }
+}
+
+async function saveConfig() {
+  const payload = {
+    bot_token: document.getElementById('token').value,
+    chat_ids: document.getElementById('chat_ids').value,
+    name: document.getElementById('name').value,
+    progress_percent: Number(document.getElementById('progress_percent').value),
+    poll_interval: Number(document.getElementById('poll_interval').value),
+    snapshot_url: document.getElementById('snapshot_url').value,
+    silent: document.getElementById('silent').checked,
+    send_photos: document.getElementById('send_photos').checked,
+    enable_service: document.getElementById('enable_service').checked,
+    language: currentLanguage
+  };
+  try {
+    await api('/api/config', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    document.getElementById('token').value = '';
+    document.getElementById('token').type = 'password';
+    tokenVisible = false;
+    document.getElementById('tokenToggle').textContent = '👁';
+    document.getElementById('tokenToggle').title = currentPack.interface.show_token;
+    document.getElementById('tokenToggle').setAttribute('aria-label', currentPack.interface.show_token);
+    document.getElementById('notice').textContent = currentPack.interface.saved;
+    await loadConfig();
+  } catch(e) { document.getElementById('notice').textContent = currentPack.interface.error_prefix + e.message; }
+}
+async function testTelegram() {
+  try {
+    await api('/api/test', {method:'POST'});
+    document.getElementById('notice').textContent = currentPack.interface.test_queued;
+  } catch(e) { document.getElementById('notice').textContent = currentPack.interface.error_prefix + e.message; }
+}
+document.getElementById('language').addEventListener('change', async e => {
+  try {
+    await loadLanguage(e.target.value);
+    await api('/api/config', {
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({language:currentLanguage})
+    });
+    document.getElementById('notice').textContent = currentPack.interface.language_changed;
+  } catch(err) {
+    document.getElementById('notice').textContent = currentPack.interface.error_prefix + err.message;
+  }
+});
+document.getElementById('languageFile').addEventListener('change', e => {
+  uploadLanguage(e.target.files[0]);
+  e.target.value = '';
+});
+async function initialize() {
+  const login = document.getElementById('login');
+  const app = document.getElementById('app');
+
+  try {
+    await api('/api/session');
+    login.hidden = true;
+    app.hidden = false;
+    await loadConfig();
+    await refreshStatus();
+
+    if (!window.statusTimer)
+      window.statusTimer = setInterval(refreshStatus, 3000);
+  } catch(e) {
+    app.hidden = true;
+    login.hidden = false;
+    document.getElementById('loginUsername').focus();
+  }
+}
+
+document.getElementById('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const error = document.getElementById('loginError');
+  error.textContent = '';
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('loginUsername').value,
+        password: document.getElementById('loginPassword').value
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || currentPack.interface.login_failed);
+
+    document.getElementById('loginPassword').value = '';
+    await initialize();
+  } catch(err) {
+    error.textContent = err.message || currentPack.interface.login_failed;
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').focus();
+  }
+});
+
+async function logout() {
+  try {
+    await fetch('/api/logout', {method: 'POST'});
+  } finally {
+    if (window.statusTimer) {
+      clearInterval(window.statusTimer);
+      window.statusTimer = null;
+    }
+    document.getElementById('app').hidden = true;
+    document.getElementById('login').hidden = false;
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginUsername').focus();
+  }
+}
+
+initialize();
+</script>
+</body>
+</html>

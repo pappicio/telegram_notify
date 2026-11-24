@@ -1,0 +1,13 @@
+{
+  "bot_token": "1004769626:AAFIXljL51zTzQKqadgyEps5X7Z3MtErAnc",
+  "chat_ids": "192916505",
+  "name": "Creator 5",
+  "silent": false,
+  "snapshot_url": "http://127.0.0.1:8080/?action=snapshot",
+  "send_photos": true,
+  "enable_service": true,
+  "progress_percent": 0,
+  "poll_interval": 3,
+  "language": "it",
+  "soc_only": true
+}

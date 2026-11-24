@@ -1,0 +1,30 @@
+Telegram Notify for OpenCreator
+Third-party attribution and modification notice
+
+Original upstream project:
+  Name: Telegram Notify
+  Repository: https://github.com/mlengle/telegram_notify
+  Repository owner / maintainer: mlengle
+  Original platform: Z-Mod
+  License: GNU General Public License v3.0 (GPL-3.0)
+
+The original upstream project provides Telegram print notifications for
+Moonraker without the Apprise library.
+
+This OpenCreator edition is an adaptation for OpenCreator and Flashforge
+Creator 5. It adds a standalone web interface, local account authentication,
+English and Italian interface packs, configuration management, printer
+monitoring, SOC/Tunneled mode gating, startup notifications and OpenCreator
+plugin lifecycle scripts.
+
+The original upstream LICENSE file is preserved as LICENSE.
+The upstream project and its maintainers are not responsible for this
+OpenCreator adaptation or its modifications.
+
+Upstream repository:
+https://github.com/mlengle/telegram_notify
+
+Z-Mod project:
+https://github.com/ghzserg/zmod
+
+Modification notice date: 2026-11-24

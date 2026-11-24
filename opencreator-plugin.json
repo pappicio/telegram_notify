@@ -1,0 +1,18 @@
+{
+  "id": "telegram_notify",
+  "name": "Telegram Notify",
+  "version": "0.1.0",
+  "description": "Telegram notifications and printer monitoring for OpenCreator.",
+  "startup": [
+    {
+      "name": "telegram-notify",
+      "exec": "scripts/start.sh",
+      "type": "service"
+    }
+  ],
+  "scripts": {
+    "install": "scripts/install.sh",
+    "update": "scripts/update.sh",
+    "uninstall": "scripts/uninstall.sh"
+  }
+}
