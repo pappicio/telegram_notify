@@ -18,3 +18,4 @@ logs/
 # Python cache
 __pycache__/
 *.py[cod]
+app/__pycache__/telegram_notify.cpython-313.pyc
