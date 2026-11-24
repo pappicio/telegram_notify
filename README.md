@@ -122,17 +122,28 @@ The test-message endpoint follows the same SOC and Enable service checks.
 
 Install and manage the plugin through the OpenCreator plugin manager.
 
-Plugin ID:
+**To install Telegram Notify:**
+
+1. Open an SSH shell on your Creator 5.
+2. Run the following command:
+
+```sh
+oc-plugin install https://github.com/pappicio/telegram_notify
+```
+
+**Plugin ID:**
 
 `telegram_notify`
 
-Useful commands:
+**Useful commands:**
 
-```sh
+```
+sh
 oc-plugin status telegram_notify
 oc-plugin restart telegram_notify
-oc-plugin logs telegram_notify
+oc-plugin stop telegram_notify
 oc-plugin update telegram_notify
+oc-plugin remove telegram_notify
 ```
 
 Web interface:
