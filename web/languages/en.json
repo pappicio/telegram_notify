@@ -25,6 +25,7 @@
     "progress_interval": "Progress Notification Interval (%)",
     "progress_disabled": "0 disables notifications",
     "poll_interval": "Moonraker Poll Interval (seconds)",
+    "web_refresh_interval": "Web UI Refresh Interval (seconds)",
     "webcam_url": "Webcam Snapshot URL",
     "silent": "Send messages silently",
     "snapshots": "Attach webcam snapshots to print events",

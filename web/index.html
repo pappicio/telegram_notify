@@ -126,6 +126,10 @@ button.secondary{background:#465363}
 <input id="poll_interval" type="number" min="2" max="30" value="3">
 </div>
 <div class="field">
+<label for="web_refresh_interval" data-i18n="web_refresh_interval">Web UI Refresh Interval (seconds)</label>
+<input id="web_refresh_interval" type="number" min="2" max="30" step="1" value="3">
+</div>
+<div class="field">
 <label for="snapshot_url" data-i18n="webcam_url">Webcam Snapshot URL</label>
 <input id="snapshot_url" value="http://127.0.0.1:8080/?action=snapshot">
 </div>
@@ -279,6 +283,18 @@ async function refreshStatus() {
     document.getElementById('progress').textContent = (s.progress || 0) + '%';
   } catch(e) {}
 }
+function configureStatusTimer(seconds) {
+  const interval = Math.max(2, Math.min(30, Math.floor(Number(seconds) || 3)));
+
+  if (window.statusTimer) {
+    clearInterval(window.statusTimer);
+    window.statusTimer = null;
+  }
+
+  if (!document.getElementById('app').hidden)
+    window.statusTimer = setInterval(refreshStatus, interval * 1000);
+}
+
 async function loadConfig() {
   const c = await api('/api/config');
   await refreshLanguages(c.language || 'en');
@@ -288,10 +304,12 @@ async function loadConfig() {
   document.getElementById('token').placeholder = savedTokenConfigured
     ? '••••••••••••'
     : (currentPack.interface.token_placeholder || currentPack.interface.enter_bot_token);
-  for (const key of ['chat_ids','name','snapshot_url','progress_percent','poll_interval'])
+  for (const key of ['chat_ids','name','snapshot_url','progress_percent','poll_interval','web_refresh_interval'])
     document.getElementById(key).value = c[key];
   for (const key of ['silent','send_photos','enable_service'])
     document.getElementById(key).checked = c[key];
+
+  configureStatusTimer(c.web_refresh_interval);
 }
 async function toggleTokenVisibility() {
   const field = document.getElementById('token');
@@ -330,6 +348,7 @@ async function saveConfig() {
     name: document.getElementById('name').value,
     progress_percent: Number(document.getElementById('progress_percent').value),
     poll_interval: Number(document.getElementById('poll_interval').value),
+    web_refresh_interval: Math.max(2, Math.min(30, Math.floor(Number(document.getElementById('web_refresh_interval').value) || 3))),
     snapshot_url: document.getElementById('snapshot_url').value,
     silent: document.getElementById('silent').checked,
     send_photos: document.getElementById('send_photos').checked,
@@ -381,8 +400,7 @@ async function initialize() {
     await loadConfig();
     await refreshStatus();
 
-    if (!window.statusTimer)
-      window.statusTimer = setInterval(refreshStatus, 3000);
+
   } catch(e) {
     app.hidden = true;
     login.hidden = false;

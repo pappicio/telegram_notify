@@ -1,7 +1,7 @@
 {
   "id": "telegram_notify",
   "name": "Telegram Notify",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Telegram notifications and printer monitoring for OpenCreator.",
   "startup": [
     {

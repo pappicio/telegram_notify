@@ -25,6 +25,7 @@
     "progress_interval": "Intervallo notifiche avanzamento (%)",
     "progress_disabled": "0 disabilita le notifiche",
     "poll_interval": "Intervallo interrogazione Moonraker (secondi)",
+    "web_refresh_interval": "Intervallo aggiornamento Web UI (secondi)",
     "webcam_url": "URL snapshot webcam",
     "silent": "Invia messaggi silenziosi",
     "snapshots": "Allega snapshot webcam agli eventi di stampa",

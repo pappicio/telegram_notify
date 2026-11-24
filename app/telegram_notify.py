@@ -144,6 +144,7 @@ config = {
     "enable_service": True,
     "progress_percent": 0,
     "poll_interval": 3,
+    "web_refresh_interval": 3,
     "language": "en"
 }
 
@@ -737,6 +738,7 @@ class Handler(BaseHTTPRequestHandler):
                 "enable_service": bool(cfg.get("enable_service", True)),
                 "progress_percent": int(cfg.get("progress_percent", 0)),
                 "poll_interval": int(cfg.get("poll_interval", 3)),
+                "web_refresh_interval": max(2, min(30, int(cfg.get("web_refresh_interval", 3)))),
             "language": cfg.get("language", "en")
             })
             return
@@ -923,6 +925,9 @@ class Handler(BaseHTTPRequestHandler):
                     )
                     config["poll_interval"] = max(
                         2, min(30, int(values.get("poll_interval", config["poll_interval"])))
+                    )
+                    config["web_refresh_interval"] = max(
+                        2, min(30, int(values.get("web_refresh_interval", config.get("web_refresh_interval", 3))))
                     )
                     selected_language = str(values.get("language", config.get("language", "en")))
                     if not re.fullmatch(r"[a-z]{2}(?:-[A-Z]{2})?", selected_language):
